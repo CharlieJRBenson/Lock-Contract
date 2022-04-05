@@ -1,42 +1,50 @@
-import { useState } from "react";
-import logo from "./logo.svg";
 import "./App.css";
+import { useState } from "react";
+import { ethers } from "ethers";
+import LockFactory from "./artifacts/contracts/LockFactory.sol/LockFactory.json";
+
+const LockFactoryAddress = "0xED5d79356875abD608A876E2B6f466716ff5aB83";
 
 function App() {
-  const [count, setCount] = useState(0);
+  //store motivation locally
+  const [lockPeriod, setLockPeriod] = useState();
+
+  //request metamask access
+  async function requestAccount() {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+  }
+
+  //call contract to set motivation
+  async function createNewLock() {
+    if (typeof window.ethereum == "undefined") return;
+
+    await requestAccount();
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const signerAdd = signer.getAddress();
+    const contract = new ethers.Contract(
+      motivationAddress,
+      Motivation.abi,
+      signer
+    );
+    const createlock = await contract.newLock(signerAdd, lockPeriod);
+    await createlock.wait();
+    fetchLocks();
+  }
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.jsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {" | "}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
+        <h1>{motivation}</h1>
+        <h4>Add Your Motivational Quote to The Blockchain!</h4>
+        <h5>Get a Random Motivation:</h5>
+        <button onClick={fetchMotivation}>Random Motivation</button>
+        <p>Add a Motivational Quote:</p>
+        <button onClick={createNewLock}>Add Motivation</button>
+        <input
+          onChange={(e) => setLockPeriod(e.target.value)}
+          placeholder="your motivation here"
+        ></input>
       </header>
     </div>
   );
