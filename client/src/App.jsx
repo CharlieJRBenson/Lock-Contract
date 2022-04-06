@@ -10,34 +10,49 @@ import {
   getLockInfo,
   withdraw,
 } from "./shared/Lock";
-import { useGlobalState } from "./store";
+import { setGlobalState, useGlobalState } from "./store";
 
 const App = () => {
   const [connectedAccount] = useGlobalState("connectedAccount");
+  const [locks] = useGlobalState("locks");
+
   useEffect(() => {
     isWalletConnected();
     getLocks();
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Header />
-      <Hero />
-      {!connectedAccount ? (
-        <div className="text-center mb-10">
-          <button
-            onClick={connectWallet}
-            className="text-white bg-blue-500 py-2 px-5 rounded-xl drop-shadow-xl border border-transparent hover:bg-transparent hover:text-blue-500 hover:border hover:border-blue-500 focus:outline-none focus:ring"
-          >
-            Connect Wallet
-          </button>
-        </div>
-      ) : (
-        <>
-          <Tabuler />
-          <AddTransactionCard />
-        </>
-      )}
+    <div className="App">
+      <header className="App-header">
+        {!connectedAccount ? (
+          <div className="connect-wallet">
+            <button onClick={connectWallet} className="connect-btn">
+              Connect Wallet
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="locks">
+              <button onClick={getLocks} className="get-locks-btn">
+                Get Locks
+              </button>
+              <h1>Locks: ({locks})</h1>
+            </div>
+            {/* <div className="new-lock">
+              <button onClick={newLock} className="get-locks-btn">
+                Make Lock
+              </button>
+              <input
+                onChange={(e) =>
+                  setGlobalState("lockedFor", parseInt(e.target.value))
+                }
+                placeholder="lock period (s)"
+              />
+            </div> */}
+          </>
+        )}
+      </header>
     </div>
   );
 };
+export default App;
