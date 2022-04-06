@@ -1,53 +1,43 @@
-import "./App.css";
-import { useState } from "react";
-import { ethers } from "ethers";
-import LockFactory from "./artifacts/contracts/LockFactory.sol/LockFactory.json";
+import { useEffect } from "react";
+import {
+  getLockFactContract,
+  getLockContract,
+  isWalletConnected,
+  getLocks,
+  connectWallet,
+  newLock,
+  getTimeStamp,
+  getLockInfo,
+  withdraw,
+} from "./shared/Lock";
+import { useGlobalState } from "./store";
 
-const LockFactoryAddress = "0xED5d79356875abD608A876E2B6f466716ff5aB83";
-
-function App() {
-  //store motivation locally
-  const [lockPeriod, setLockPeriod] = useState();
-
-  //request metamask access
-  async function requestAccount() {
-    await window.ethereum.request({ method: "eth_requestAccounts" });
-  }
-
-  //call contract to set motivation
-  async function createNewLock() {
-    if (typeof window.ethereum == "undefined") return;
-
-    await requestAccount();
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const signerAdd = signer.getAddress();
-    const contract = new ethers.Contract(
-      motivationAddress,
-      Motivation.abi,
-      signer
-    );
-    const createlock = await contract.newLock(signerAdd, lockPeriod);
-    await createlock.wait();
-    fetchLocks();
-  }
+const App = () => {
+  const [connectedAccount] = useGlobalState("connectedAccount");
+  useEffect(() => {
+    isWalletConnected();
+    getLocks();
+  }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>{motivation}</h1>
-        <h4>Add Your Motivational Quote to The Blockchain!</h4>
-        <h5>Get a Random Motivation:</h5>
-        <button onClick={fetchMotivation}>Random Motivation</button>
-        <p>Add a Motivational Quote:</p>
-        <button onClick={createNewLock}>Add Motivation</button>
-        <input
-          onChange={(e) => setLockPeriod(e.target.value)}
-          placeholder="your motivation here"
-        ></input>
-      </header>
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <Hero />
+      {!connectedAccount ? (
+        <div className="text-center mb-10">
+          <button
+            onClick={connectWallet}
+            className="text-white bg-blue-500 py-2 px-5 rounded-xl drop-shadow-xl border border-transparent hover:bg-transparent hover:text-blue-500 hover:border hover:border-blue-500 focus:outline-none focus:ring"
+          >
+            Connect Wallet
+          </button>
+        </div>
+      ) : (
+        <>
+          <Tabuler />
+          <AddTransactionCard />
+        </>
+      )}
     </div>
   );
-}
-
-export default App;
+};
