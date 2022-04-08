@@ -10,11 +10,12 @@ import {
   getLockInfo,
   withdraw,
 } from "./shared/Lock";
-import { setGlobalState, useGlobalState } from "./store";
+import { useGlobalState } from "./store";
 
 const App = () => {
   const [connectedAccount] = useGlobalState("connectedAccount");
   const [locks] = useGlobalState("locks");
+  const [lockedFor] = useGlobalState("lockedFor");
 
   useEffect(() => {
     isWalletConnected();
@@ -36,19 +37,20 @@ const App = () => {
               <button onClick={getLocks} className="get-locks-btn">
                 Get Locks
               </button>
-              <h1>Locks: ({locks})</h1>
+              <h1>Locks: ({connectedAccount})</h1>
             </div>
-            {/* <div className="new-lock">
-              <button onClick={newLock} className="get-locks-btn">
+            <div className="new-lock">
+              <button
+                onClick={() => newLock({ connectWallet }, "100")}
+                className="get-locks-btn"
+              >
                 Make Lock
               </button>
               <input
-                onChange={(e) =>
-                  setGlobalState("lockedFor", parseInt(e.target.value))
-                }
+                onChange={(e) => setGlobalState("lockedFor", e.target.value)}
                 placeholder="lock period (s)"
               />
-            </div> */}
+            </div>
           </>
         )}
       </header>
